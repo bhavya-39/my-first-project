@@ -52,10 +52,8 @@ final _promoWords = RegExp(
 
 // ── Amount patterns ──────────────────────────────────────────────────────────
 final _amountPatterns = [
-  RegExp(r'(?:Rs\.?|INR|₹)\s*(\d{1,2}(?:,\d{2})*(?:,\d{3})?|\d+)(?:\.\d{1,2})?',
-      caseSensitive: false),
-  RegExp(r'(\d{1,2}(?:,\d{2})*(?:,\d{3})?|\d+)(?:\.\d{1,2})?\s*(?:Rs\.?|INR|₹)',
-      caseSensitive: false),
+  RegExp(r'(?:Rs\.?|INR|₹)\s*([\d,]+\.?\d{0,2})', caseSensitive: false),
+  RegExp(r'([\d,]+\.?\d{0,2})\s*(?:Rs\.?|INR|₹)', caseSensitive: false),
 ];
 
 // ── Merchant / payee extraction ───────────────────────────────────────────────
@@ -166,17 +164,59 @@ class SmsParserService {
     if (_promoWords.hasMatch(body)) return null;
     if (!_debitWords.hasMatch(body)) return null; // must have debit word
 
-    // ── Step 2: Amount ────────────────────────────────────────────────────
-    double? amount;
+    // ── Step 2: Context-aware amount extraction ────────────────────────────
+    double? bestAmount;
+    int minDistanceToDebit = 999999;
+    
+    // Find all occurrences of amount patterns
+    final matches = <RegExpMatch>[];
     for (final pattern in _amountPatterns) {
-      final m = pattern.firstMatch(body);
-      if (m != null) {
-        final raw = m.group(1)!.replaceAll(',', '');
-        amount = double.tryParse(raw);
-        if (amount != null && amount > 0) break;
+      matches.addAll(pattern.allMatches(body));
+    }
+    
+    final debitMatches = _debitWords.allMatches(body).toList();
+    if (debitMatches.isEmpty) return null; // Must have debit words
+
+    // Balance keywords to ignore
+    final balanceWords = RegExp(r'\b(bal(ance)?|avl|available|limit)\b', caseSensitive: false);
+    final balanceMatches = balanceWords.allMatches(body).toList();
+    
+    for (final m in matches) {
+      final raw = m.group(1)!.replaceAll(',', '');
+      final amountCandidate = double.tryParse(raw);
+      // Ignore invalid, zero, or excessively large amounts > ₹5,00,000
+      if (amountCandidate == null || amountCandidate <= 0 || amountCandidate > 500000) continue;
+      
+      final amountIndex = m.start;
+      
+      // Check if this amount is right next to a balance/limit keyword (e.g. within 30 chars)
+      bool nearBalance = false;
+      for (final bm in balanceMatches) {
+        if ((bm.start - amountIndex).abs() < 30) {
+          nearBalance = true;
+          break;
+        }
+      }
+      if (nearBalance) continue; // Ignore balance amounts
+      
+      // Calculate distance to nearest debit keyword
+      int distanceToDebit = 999999;
+      for (final dm in debitMatches) {
+        final dist = (dm.start - amountIndex).abs();
+        if (dist < distanceToDebit) {
+          distanceToDebit = dist;
+        }
+      }
+      
+      // Select the amount closest to a debit keyword
+      if (distanceToDebit < minDistanceToDebit) {
+        minDistanceToDebit = distanceToDebit;
+        bestAmount = amountCandidate;
       }
     }
-    if (amount == null || amount <= 0) return null; // no amount → reject
+    
+    if (bestAmount == null) return null; // No valid amount found
+    double amount = bestAmount;
 
     // ── Step 3: Confidence scoring ────────────────────────────────────────
     int score = 40; // found amount
