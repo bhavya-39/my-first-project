@@ -18,8 +18,9 @@ class UpiSmsService {
 
   // ── Regex patterns ──────────────────────────────────────────────────────────
   static final _upiKeywords = RegExp(
-    r'\b(UPI|IMPS|NEFT|RTGS|PhonePe|GPay|Google Pay|Paytm|BharatPe|Razorpay|'
-    r'debited|credited|sent|received|transferred|payment|txn|transaction)\b',
+    r'\b(UPI|IMPS|NEFT|RTGS|PhonePe|GPay|Google Pay|Paytm|BharatPe|Razorpay|Cred|'
+    r'FamPay|MobiKwik|Amazon Pay|Freecharge|debited|credited|sent|received|'
+    r'transferred|payment|txn|transaction)\b',
     caseSensitive: false,
   );
 
@@ -155,32 +156,68 @@ class UpiSmsService {
         .trim();
   }
 
+  static const _categoryKeywords = <String, List<String>>{
+    'Food & Groceries': [
+      'zomato', 'swiggy', 'dominos', 'kfc', 'mcdonalds', 'subway', 'pizza', 'burger king',
+      'starbucks', 'cafe', 'restaurant', 'food', 'eat', 'biryani', 'haldiram', 'bikanervala',
+      'blinkit', 'zepto', 'dunzo', 'groceries', 'bigbasket', 'grofer', 'instamart', 'bbnow',
+      'dmart', 'reliance fresh', 'nature', 'sweet', 'bakery', 'licious', 'freshtohome',
+    ],
+    'Shopping': [
+      'amazon', 'flipkart', 'myntra', 'meesho', 'ajio', 'nykaa', 'firstcry',
+      'snapdeal', 'tatacliq', 'shopping', 'store', 'mart', 'mall', 'supermarket',
+      'decathlon', 'zara', 'h&m', 'max', 'pantaloons', 'shoppers stop', 'croma',
+      'reliance digital', 'lenskart', 'titan', 'apparel', 'clothing', 'footwear',
+    ],
+    'Transport': [
+      'uber', 'ola', 'rapido', 'namma yatri', 'indrive', 'blu smart', 'irctc', 'train',
+      'railway', 'bus', 'flight', 'makemytrip', 'yatra', 'easemytrip', 'cleartrip',
+      'redbus', 'ixigo', 'metro', 'toll', 'fastag', 'park+', 'parking', 'petrol',
+      'diesel', 'cng', 'fuel', 'hpcl', 'iocl', 'bpcl', 'indian oil', 'shell',
+    ],
+    'Entertainment': [
+      'netflix', 'hotstar', 'spotify', 'prime', 'sony', 'zee', 'bookmyshow',
+      'inox', 'pvr', 'cinepolis', 'youtube', 'apple', 'game', 'play store',
+      'steam', 'epic games', 'playstation', 'xbox', 'nintendo', 'paytm movies',
+    ],
+    'Utilities': [
+      'electricity', 'water', 'gas', 'broadband', 'jio', 'airtel', 'vi ', 'vodafone',
+      'bsnl', 'tata sky', 'tata play', 'dth', 'recharge', 'postpaid', 'prepaid', 'internet',
+      'bescom', 'msedcl', 'tata power', 'adani', 'bses', 'uppcl', 'tneb', 'torrent',
+      'act fibernet', 'hathway', 'excitel', 'wifi', 'bill',
+    ],
+    'Health': [
+      'hospital', 'clinic', 'pharmacy', 'medical', 'doctor', 'lab', 'test',
+      'medicine', 'apollo', 'fortis', 'max healthcare', 'netmeds', '1mg', 'pharmeasy',
+      'practo', 'srl diagnostics', 'dr lal', 'dental', 'eye care', 'spectacles',
+      'fitness', 'cult fit', 'gym', 'health',
+    ],
+    'Housing': [
+      'rent', 'deposit', 'maintenance', 'urban company', 'urban clap', 'nobroker',
+      'magicbricks', 'home centre', 'pepperfry', 'ikea', 'furniture', 'plumber',
+    ],
+    'Education': [
+      'school', 'college', 'university', 'byju', 'unacademy', 'vedantu', 'physics wallah',
+      'udemy', 'coursera', 'upgrad', 'fees', 'tuition', 'books', 'stationery',
+    ],
+    'Investment': [
+      'zerodha', 'groww', 'upstox', 'angel one', 'indmoney', 'mutual fund', 'sip',
+      'lic', 'insurance', 'hdfc life', 'sbi life', 'policybazaar', 'investment',
+    ],
+    'Salary & Income': [
+      'salary', 'stipend', 'bonus', 'dividend', 'interest', 'refund',
+    ],
+  };
+
   String _inferCategory(String body, TransactionType type) {
     final lower = body.toLowerCase();
-    if (lower.contains('zomato') || lower.contains('swiggy') || lower.contains('food')) {
-      return 'Food';
+    
+    for (final entry in _categoryKeywords.entries) {
+      if (entry.value.any(lower.contains)) {
+        return entry.key;
+      }
     }
-    if (lower.contains('amazon') || lower.contains('flipkart') || lower.contains('myntra') || lower.contains('shopping')) {
-      return 'Shopping';
-    }
-    if (lower.contains('uber') || lower.contains('ola') || lower.contains('metro') || lower.contains('bus')) {
-      return 'Transport';
-    }
-    if (lower.contains('electricity') || lower.contains('water') || lower.contains('gas') || lower.contains('broadband')) {
-      return 'Utilities';
-    }
-    if (lower.contains('netflix') || lower.contains('spotify') || lower.contains('prime') || lower.contains('hotstar')) {
-      return 'Entertainment';
-    }
-    if (lower.contains('hospital') || lower.contains('pharmacy') || lower.contains('medical') || lower.contains('doctor')) {
-      return 'Health';
-    }
-    if (lower.contains('rent') || lower.contains('loan') || lower.contains('emi')) {
-      return 'Housing';
-    }
-    if (lower.contains('salary') || lower.contains('stipend')) {
-      return 'Salary';
-    }
+    
     return type == TransactionType.expense ? 'UPI Expense' : 'UPI Income';
   }
 

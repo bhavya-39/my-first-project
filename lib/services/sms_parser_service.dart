@@ -8,26 +8,19 @@ const int _kReviewThreshold = 40;
 
 // ── Trusted sender whitelist ──────────────────────────────────────────────────
 const _trustedSenders = {
-  // HDFC
-  'HDFCBK', 'HDFCBANK', 'HDFC',
-  // ICICI
-  'ICICIB', 'ICICIBANK', 'ICICI',
-  // SBI
-  'SBIBNK', 'SBIINB', 'SBI', 'SBIPSG', 'SBIMSG',
-  // Axis
-  'AXISBK', 'AXISBANK', 'AXIS',
-  // Kotak
-  'KOTAKBK', 'KOTAK',
-  // Yes
-  'YESBNK', 'YESBANK',
-  // IndusInd / Bank of Baroda / PNB
-  'INDBNK', 'INDIBNK', 'BOBBNK', 'PNBSMS',
-  // UPI apps
-  'PAYTM', 'PYTMMB', 'PAYTMSMS',
-  'GPAY', 'GOOGLEPAY',
-  'PHONEPE', 'PHONPE',
-  'BHARATPE', 'BHIMAPP', 'BHIMUPI',
-  'AMAZONPAY', 'AMZNPAY',
+  // Major Private Banks
+  'HDFCBK', 'HDFCBANK', 'HDFC', 'ICICIB', 'ICICIBANK', 'ICICI',
+  'AXISBK', 'AXISBANK', 'AXIS', 'KOTAKBK', 'KOTAK', 'YESBNK', 'YESBANK',
+  'INDBNK', 'INDIBNK', 'IDFC', 'IDFCBK', 'IDFCFB', 'FEDERAL', 'SOUTHBANK',
+  // Major Public Banks
+  'SBIBNK', 'SBIINB', 'SBI', 'SBIPSG', 'SBIMSG', 'BOBBNK', 'PNBSMS',
+  'CANARA', 'UNION', 'CBI', 'IOB', 'BOI', 'INDIAN', 'UCO', 'IDBI',
+  // Foreign/Other Banks
+  'CITI', 'STANCH', 'HSBC', 'DBS', 'KVB',
+  // UPI / FinTech Apps
+  'PAYTM', 'PYTMMB', 'PAYTMSMS', 'GPAY', 'GOOGLEPAY', 'PHONEPE', 'PHONPE',
+  'BHARATPE', 'BHIMAPP', 'BHIMUPI', 'AMAZONPAY', 'AMZNPAY', 'CRED',
+  'FAMPAY', 'SLICE', 'POSTPE', 'MOBIKWIK', 'FREECHARGE',
 };
 
 // ── Debit-indicating keywords ─────────────────────────────────────────────────
@@ -39,8 +32,9 @@ final _debitWords = RegExp(
 // ── Rejection keywords — any match immediately discards the message ───────────
 final _rejectWords = RegExp(
   r'\b(credited|received|refund(?:ed)?|revers(?:ed|al)|cashback|failed|declined|blocked|insufficient|'
-  r'otp|one.?time.?pass|balance update|available bal|avl bal|bill gen(?:erat)?|due date|'
-  r'interest|emi reminder|a\/c created|account created|nominee|fd book|fd open)\b',
+  r'otp|one.?time|password|pin|balance update|available bal|avl bal|bill gen(?:erat)?|due date|'
+  r'interest|emi reminder|a\/c created|account created|nominee|fd book|fd open|kyc|login alert|'
+  r'statement|cheque|bounce|tax|tds|dear customer\, please note|never share)\b',
   caseSensitive: false,
 );
 
@@ -74,37 +68,56 @@ final _merchantNoise = RegExp(
 
 // ── Category keyword mapping ──────────────────────────────────────────────────
 const _categoryKeywords = <String, List<String>>{
-  'Food': [
-    'zomato', 'swiggy', 'dominos', 'kfc', 'mcdonalds', 'subway', 'pizza',
-    'starbucks', 'cafe', 'restaurant', 'food', 'eat', 'biryani', 'haldirams',
-    'blinkit', 'zepto', 'dunzo', 'groceries', 'bigbasket', 'grofer',
+  'Food & Groceries': [
+    'zomato', 'swiggy', 'dominos', 'kfc', 'mcdonalds', 'subway', 'pizza', 'burger king',
+    'starbucks', 'cafe', 'restaurant', 'food', 'eat', 'biryani', 'haldiram', 'bikanervala',
+    'blinkit', 'zepto', 'dunzo', 'groceries', 'bigbasket', 'grofer', 'instamart', 'bbnow',
+    'dmart', 'reliance fresh', 'nature', 'sweet', 'bakery', 'licious', 'freshtohome',
   ],
   'Shopping': [
     'amazon', 'flipkart', 'myntra', 'meesho', 'ajio', 'nykaa', 'firstcry',
-    'snapdeal', 'tatacliq', 'shopping', 'store', 'mart', 'mall',
+    'snapdeal', 'tatacliq', 'shopping', 'store', 'mart', 'mall', 'supermarket',
+    'decathlon', 'zara', 'h&m', 'max', 'pantaloons', 'shoppers stop', 'croma',
+    'reliance digital', 'lenskart', 'titan', 'apparel', 'clothing', 'footwear',
   ],
   'Transport': [
-    'uber', 'ola', 'rapido', 'metro', 'irctc', 'railway', 'bus', 'flight',
-    'makemytrip', 'yatra', 'easemytrip', 'petrol', 'fuel', 'parking',
+    'uber', 'ola', 'rapido', 'namma yatri', 'indrive', 'blu smart', 'irctc', 'train',
+    'railway', 'bus', 'flight', 'makemytrip', 'yatra', 'easemytrip', 'cleartrip',
+    'redbus', 'ixigo', 'metro', 'toll', 'fastag', 'park+', 'parking', 'petrol',
+    'diesel', 'cng', 'fuel', 'hpcl', 'iocl', 'bpcl', 'indian oil', 'shell',
   ],
   'Entertainment': [
     'netflix', 'hotstar', 'spotify', 'prime', 'sony', 'zee', 'bookmyshow',
-    'inox', 'pvr', 'youtube', 'apple', 'game', 'play store',
+    'inox', 'pvr', 'cinepolis', 'youtube', 'apple', 'game', 'play store',
+    'steam', 'epic games', 'playstation', 'xbox', 'nintendo', 'paytm movies',
   ],
   'Utilities': [
-    'electricity', 'water', 'gas', 'broadband', 'jio', 'airtel', 'vi ',
-    'bsnl', 'tata sky', 'dth', 'recharge', 'postpaid', 'prepaid', 'internet',
+    'electricity', 'water', 'gas', 'broadband', 'jio', 'airtel', 'vi ', 'vodafone',
+    'bsnl', 'tata sky', 'tata play', 'dth', 'recharge', 'postpaid', 'prepaid', 'internet',
+    'bescom', 'msedcl', 'tata power', 'adani', 'bses', 'uppcl', 'tneb', 'torrent',
+    'act fibernet', 'hathway', 'excitel', 'wifi', 'bill',
   ],
   'Health': [
     'hospital', 'clinic', 'pharmacy', 'medical', 'doctor', 'lab', 'test',
-    'medicine', 'apollo', 'fortis', 'max hospital', 'netmeds', '1mg', 'pharmeasy',
+    'medicine', 'apollo', 'fortis', 'max healthcare', 'netmeds', '1mg', 'pharmeasy',
+    'practo', 'srl diagnostics', 'dr lal', 'dental', 'eye care', 'spectacles',
+    'fitness', 'cult fit', 'gym', 'health',
+  ],
+  'Housing': [
+    'rent', 'deposit', 'maintenance', 'urban company', 'urban clap', 'nobroker',
+    'magicbricks', 'home centre', 'pepperfry', 'ikea', 'furniture', 'plumber',
   ],
   'Education': [
-    'school', 'college', 'university', 'byju', 'unacademy', 'vedantu',
+    'school', 'college', 'university', 'byju', 'unacademy', 'vedantu', 'physics wallah',
     'udemy', 'coursera', 'upgrad', 'fees', 'tuition', 'books', 'stationery',
   ],
+  'Investment': [
+    'zerodha', 'groww', 'upstox', 'angel one', 'indmoney', 'mutual fund', 'sip',
+    'lic', 'insurance', 'hdfc life', 'sbi life', 'policybazaar', 'investment',
+  ],
   'Transfers': [
-    'transfer', 'send money', 'neft', 'imps', 'rtgs', 'bank transfer',
+    'transfer', 'send money', 'neft', 'imps', 'rtgs', 'bank transfer', 'upi',
+    'wallet load', 'to account',
   ],
 };
 
