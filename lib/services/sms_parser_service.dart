@@ -4,7 +4,7 @@ import '../models/expense_model.dart';
 
 // ── Confidence thresholds ─────────────────────────────────────────────────────
 const int _kAutoAddThreshold = 70;
-const int _kReviewThreshold = 40;
+// _kReviewThreshold is intentionally removed; rejection threshold is now 30.
 
 // ── Trusted sender whitelist ──────────────────────────────────────────────────
 const _trustedSenders = {
@@ -12,29 +12,37 @@ const _trustedSenders = {
   'HDFCBK', 'HDFCBANK', 'HDFC', 'ICICIB', 'ICICIBANK', 'ICICI',
   'AXISBK', 'AXISBANK', 'AXIS', 'KOTAKBK', 'KOTAK', 'YESBNK', 'YESBANK',
   'INDBNK', 'INDIBNK', 'IDFC', 'IDFCBK', 'IDFCFB', 'FEDERAL', 'SOUTHBANK',
+  'RBLBNK', 'RBLBANK', 'DCBBNK', 'DCBBANK', 'SARASWAT', 'KARNATAKA',
+  'BANDHAN', 'UJJIVAN', 'EQUITAS', 'FINCARE', 'SURYODAY', 'ESAFBNK',
   // Major Public Banks
   'SBIBNK', 'SBIINB', 'SBI', 'SBIPSG', 'SBIMSG', 'BOBBNK', 'PNBSMS',
-  'CANARA', 'UNION', 'CBI', 'IOB', 'BOI', 'INDIAN', 'UCO', 'IDBI',
+  'CANARA', 'CANBK', 'UNION', 'CBI', 'IOB', 'BOI', 'INDIAN', 'UCO', 'IDBI',
+  'MAHABNK', 'MAHBNK', 'SYNDICB', 'VIJAYA', 'DENABNK', 'ANDBNK',
+  'ALLABNK', 'CORPBNK', 'OBOBC', 'PSBSMS',
   // Foreign/Other Banks
-  'CITI', 'STANCH', 'HSBC', 'DBS', 'KVB',
+  'CITI', 'CITIBNK', 'STANCH', 'SCBNK', 'HSBC', 'DBS', 'KVB', 'DBSBNK',
+  'BARODA', 'BAROBNK',
   // UPI / FinTech Apps
   'PAYTM', 'PYTMMB', 'PAYTMSMS', 'GPAY', 'GOOGLEPAY', 'PHONEPE', 'PHONPE',
   'BHARATPE', 'BHIMAPP', 'BHIMUPI', 'AMAZONPAY', 'AMZNPAY', 'CRED',
-  'FAMPAY', 'SLICE', 'POSTPE', 'MOBIKWIK', 'FREECHARGE',
+  'FAMPAY', 'SLICE', 'POSTPE', 'MOBIKWIK', 'FREECHARGE', 'LAZYP', 'LAZYPAY',
+  'JUPITER', 'FISDOM', 'NIYO', 'NIYOBNK',
 };
 
 // ── Debit-indicating keywords ─────────────────────────────────────────────────
 final _debitWords = RegExp(
-  r'\b(debit(?:ed)?|spent|paid|payment|purchase|charged|withdrawn|deducted|sent|transferred to)\b',
+  r'\b(debit(?:ed)?|spent|paid|payment(?:\s+of)?|purchase|charged|withdrawn|deducted|sent|'
+  r'transferred to|pos|mandate|auto.?pay|emi|standing instruction|si executed)\b',
   caseSensitive: false,
 );
 
 // ── Rejection keywords — any match immediately discards the message ───────────
+// NOTE: Keep this list NARROW — only block clearly non-transactional messages.
+// Do NOT add words like 'interest', 'emi', 'bill' as many real debit SMS contain them.
 final _rejectWords = RegExp(
-  r'\b(credited|received|refund(?:ed)?|revers(?:ed|al)|cashback|failed|declined|blocked|insufficient|'
-  r'otp|one.?time|password|pin|balance update|available bal|avl bal|bill gen(?:erat)?|due date|'
-  r'interest|emi reminder|a\/c created|account created|nominee|fd book|fd open|kyc|login alert|'
-  r'statement|cheque|bounce|tax|tds|dear customer\, please note|never share)\b',
+  r'\b(refund(?:ed)?|revers(?:ed|al)|cashback|failed|declined|blocked|insufficient funds|'
+  r'otp|one.?time password|never share your|a\/c created|account created|'
+  r'nominee|fd book|fd open|kyc|login alert|lucky draw|pre-approv)\b',
   caseSensitive: false,
 );
 
@@ -197,15 +205,19 @@ class SmsParserService {
     for (final m in matches) {
       final raw = m.group(1)!.replaceAll(',', '');
       final amountCandidate = double.tryParse(raw);
-      // Ignore invalid, zero, or excessively large amounts > ₹5,00,000
-      if (amountCandidate == null || amountCandidate <= 0 || amountCandidate > 500000) continue;
+      // Ignore invalid, zero, or excessively large amounts > ₹10,00,000
+      if (amountCandidate == null || amountCandidate <= 0 || amountCandidate > 1000000) continue;
       
       final amountIndex = m.start;
       
-      // Check if this amount is right next to a balance/limit keyword (e.g. within 30 chars)
+      // Check if this amount is IMMEDIATELY next to a balance/limit keyword.
+      // Use a wider window (60 chars) but only skip if the balance keyword appears
+      // AFTER the amount (i.e., "debited Rs.500 Bal: Rs.2000" – skip the 2000 not the 500).
       bool nearBalance = false;
       for (final bm in balanceMatches) {
-        if ((bm.start - amountIndex).abs() < 30) {
+        final dist = bm.start - amountIndex; // positive = balance is after amount
+        // Ignore if balance keyword is within 5–80 chars AFTER the amount
+        if (dist > 5 && dist < 80) {
           nearBalance = true;
           break;
         }
@@ -232,8 +244,8 @@ class SmsParserService {
     double amount = bestAmount;
 
     // ── Step 3: Confidence scoring ────────────────────────────────────────
-    int score = 40; // found amount
-    score += 30; // passed debit word check
+    int score = 45; // found amount (+45)
+    score += 25; // passed debit word check (+25)
 
     final normalizedSender = sender?.toUpperCase().replaceAll('-', '') ?? '';
     final isTrusted = _trustedSenders.any(
@@ -256,7 +268,9 @@ class SmsParserService {
     }
 
     // ── Step 5: Below reject threshold? ──────────────────────────────────
-    if (score < _kReviewThreshold) return null;
+    // Lowered threshold: any message with an amount + debit word scores ≥70
+    // so practically only completely unscored messages are rejected here.
+    if (score < 30) return null;
 
     // ── Step 6: Category + bank ───────────────────────────────────────────
     final category = _inferCategory(body, merchant);

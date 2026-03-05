@@ -7,6 +7,7 @@ import '../services/auth_service.dart';
 import '../services/budget_service.dart';
 import '../services/budget_alert_service.dart';
 import '../services/sms_listener_service.dart';
+
 import '../services/expense_repository.dart';
 import '../services/piggy_bank_service.dart';
 import '../models/expense_model.dart';
@@ -94,6 +95,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     });
   }
 
+
   Future<void> _loadPiggyBank() async {
     final total = await _piggyBank.getTotalSavings();
     final count = await _piggyBank.getSavingsCount();
@@ -154,6 +156,8 @@ class _DashboardScreenState extends State<DashboardScreen>
       }
     }
   }
+
+
 
   Future<void> _handleSignOut() async {
     final confirmed = await showDialog<bool>(
@@ -489,13 +493,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       color: const Color(0xFF0EA5E9),
                       onTap: _syncing ? () {} : () => _syncSms(),
                     ),
-                    const SizedBox(width: 10),
-                    _quickAction(
-                      icon: Icons.bar_chart_rounded,
-                      label: 'Reports',
-                      color: const Color(0xFFF59E0B),
-                      onTap: () {},
-                    ),
+
                   ]),
                   const SizedBox(height: 22),
 

@@ -20,7 +20,8 @@ class UpiSmsService {
   static final _upiKeywords = RegExp(
     r'\b(UPI|IMPS|NEFT|RTGS|PhonePe|GPay|Google Pay|Paytm|BharatPe|Razorpay|Cred|'
     r'FamPay|MobiKwik|Amazon Pay|Freecharge|debited|credited|sent|received|'
-    r'transferred|payment|txn|transaction)\b',
+    r'transferred|payment|txn|transaction|POS|mandate|auto.?pay|ECS|SI executed|'
+    r'standing instruction|purchase|spent|deducted|withdrawn|charged)\b',
     caseSensitive: false,
   );
 
@@ -30,7 +31,9 @@ class UpiSmsService {
   );
 
   static final _debitKeywords = RegExp(
-    r'\b(debited|sent|paid|deducted|withdrawn|payment of|transferred to)\b',
+    r'\b(debited|sent|paid|deducted|withdrawn|payment of|transferred to|'
+    r'purchase|spent|charged|pos|mandate|auto.?pay|emi paid|si executed|'
+    r'standing instruction|ecs debit)\b',
     caseSensitive: false,
   );
 
@@ -111,11 +114,28 @@ class UpiSmsService {
   }
 
   _ParsedTransaction? _parseMessage(String body, DateTime date) {
-    // Amount
-    final amountMatch = _amountRegex.firstMatch(body);
-    if (amountMatch == null) return null;
-    final amountStr = amountMatch.group(1)!.replaceAll(',', '');
-    final amount = double.tryParse(amountStr);
+    // Amount — try to get the FIRST amount (transaction amount, not balance)
+    double? amount;
+    final allAmountMatches = _amountRegex.allMatches(body).toList();
+    // Balance indicator to skip amounts that are clearly balance figures
+    final balanceRegex = RegExp(r'\b(bal(?:ance)?|avl|available|limit)\b', caseSensitive: false);
+    for (final amountMatch in allAmountMatches) {
+      final start = amountMatch.start;
+      // If a balance keyword appears within 80 chars AFTER this amount, skip it
+      final balMatch = balanceRegex.firstMatch(body.substring(start));
+      if (balMatch != null && balMatch.start < 80) continue;
+      final amountStr = amountMatch.group(1)!.replaceAll(',', '');
+      final parsed = double.tryParse(amountStr);
+      if (parsed != null && parsed > 0) {
+        amount = parsed;
+        break;
+      }
+    }
+    // Fallback: use the first match if all were skipped
+    if (amount == null && allAmountMatches.isNotEmpty) {
+      final amountStr = allAmountMatches.first.group(1)!.replaceAll(',', '');
+      amount = double.tryParse(amountStr);
+    }
     if (amount == null || amount <= 0) return null;
 
     // Transaction type
