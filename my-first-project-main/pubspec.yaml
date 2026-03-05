@@ -1,0 +1,46 @@
+name: fintrack
+description: Student Money Manager - Track your finances smartly.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Firebase
+  firebase_core: ^4.4.0
+  firebase_auth: ^6.1.4
+  cloud_firestore: ^6.1.2
+
+  # Google Sign-In
+  google_sign_in: ^7.2.0
+
+  # UI & Fonts
+  google_fonts: ^8.0.2
+  cupertino_icons: ^1.0.8
+
+  # SMS & Permissions (UPI parsing)
+  flutter_sms_inbox: ^1.0.3
+  permission_handler: ^11.3.1
+  crypto: ^3.0.3
+
+  # Local Database
+  sqflite: ^2.3.3
+  path: ^1.9.0
+
+  # Background Notifications
+  flutter_local_notifications: ^18.0.1
+  workmanager: ^0.9.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  
+
