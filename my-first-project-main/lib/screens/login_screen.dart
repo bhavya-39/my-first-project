@@ -169,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen>
                               hintText: 'you@university.edu',
                               prefixIcon: Icon(
                                 Icons.email_outlined,
-                                color: AppTheme.primaryTeal,
+                                color: AppTheme.skyBlue,
                               ),
                             ),
                             validator: (value) {
@@ -197,7 +197,7 @@ class _LoginScreenState extends State<LoginScreen>
                               hintText: '••••••••',
                               prefixIcon: const Icon(
                                 Icons.lock_outline,
-                                color: AppTheme.primaryTeal,
+                                color: AppTheme.skyBlue,
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -243,7 +243,7 @@ class _LoginScreenState extends State<LoginScreen>
                                 'Forgot Password?',
                                 style: GoogleFonts.poppins(
                                   fontSize: 13,
-                                  color: AppTheme.primaryTeal,
+                                  color: AppTheme.skyBlue,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -306,7 +306,7 @@ class _LoginScreenState extends State<LoginScreen>
                           'Sign Up',
                           style: GoogleFonts.poppins(
                             fontSize: 14,
-                            color: AppTheme.primaryTeal,
+                            color: AppTheme.skyBlue,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -332,7 +332,7 @@ class _LoginScreenState extends State<LoginScreen>
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryTeal.withValues(alpha: 0.3),
+            color: AppTheme.skyBlue.withValues(alpha: 0.3),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),

@@ -13,7 +13,11 @@ import '../models/expense_model.dart';
 import '../widgets/budget_card.dart';
 import '../widgets/category_breakdown_card.dart';
 import '../widgets/piggy_bank_card.dart';
+import '../widgets/profile_avatar.dart';
 import 'login_screen.dart';
+import 'profile_screen.dart';
+import 'reports_screen.dart';
+import 'add_expense_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -147,7 +151,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       if (!silent || count > 0) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           backgroundColor:
-              count > 0 ? AppTheme.successGreen : AppTheme.primaryBlue,
+              count > 0 ? AppTheme.successGreen : AppTheme.skyBlueDark,
           behavior: SnackBarBehavior.floating,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -211,10 +215,10 @@ class _DashboardScreenState extends State<DashboardScreen>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-                color: const Color(0xFF8B5CF6).withValues(alpha: 0.12),
+                color: const Color(0xFF0EA5E9).withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10)),
             child: const Icon(Icons.pie_chart_rounded,
-                color: Color(0xFF8B5CF6), size: 20),
+                color: Color(0xFF0EA5E9), size: 20),
           ),
           const SizedBox(width: 10),
           Text(_budget != null ? 'Edit Budget' : 'Set Monthly Budget',
@@ -239,7 +243,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide:
-                        const BorderSide(color: Color(0xFF8B5CF6), width: 2)),
+                        const BorderSide(color: Color(0xFF0EA5E9), width: 2)),
                 filled: true,
                 fillColor: Colors.grey.shade50,
               ),
@@ -272,7 +276,7 @@ class _DashboardScreenState extends State<DashboardScreen>
               if (ctx.mounted) Navigator.pop(ctx);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8B5CF6),
+              backgroundColor: const Color(0xFF0EA5E9),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
@@ -393,15 +397,19 @@ class _DashboardScreenState extends State<DashboardScreen>
     final email = _user?.email ?? 'Student';
     final displayName = _capitalize(email.split('@').first);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bg = isDark ? AppTheme.backgroundDark : AppTheme.backgroundLight;
+    final textPrimary = isDark ? AppTheme.textDarkMode : AppTheme.textDark;
+
     return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
+      backgroundColor: bg,
       body: FadeTransition(
         opacity: _fadeAnim,
         child: CustomScrollView(
           slivers: [
             // ── App Bar ──────────────────────────────────────────────────────
             SliverAppBar(
-              expandedHeight: 130,
+              expandedHeight: 160,
               pinned: true,
               automaticallyImplyLeading: false,
               flexibleSpace: FlexibleSpaceBar(
@@ -419,6 +427,22 @@ class _DashboardScreenState extends State<DashboardScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              Row(
+                                children: [
+                                  const Icon(
+                                      Icons.account_balance_wallet_rounded,
+                                      color: Colors.white,
+                                      size: 22),
+                                  const SizedBox(width: 8),
+                                  Text('FinTrack',
+                                      style: GoogleFonts.poppins(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w800,
+                                          color: Colors.white,
+                                          letterSpacing: 0.5)),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
                               Text('Welcome back,',
                                   style: GoogleFonts.poppins(
                                       fontSize: 13,
@@ -437,26 +461,35 @@ class _DashboardScreenState extends State<DashboardScreen>
                             ],
                           ),
                           Row(children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.5)),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  displayName.isNotEmpty
-                                      ? displayName[0].toUpperCase()
-                                      : 'S',
-                                  style: GoogleFonts.poppins(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white),
-                                ),
-                              ),
+                            ProfileAvatar(
+                              size: 44,
+                              fallbackInitial: displayName.isNotEmpty
+                                  ? displayName[0].toUpperCase()
+                                  : 'S',
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  PageRouteBuilder(
+                                    pageBuilder: (context, animation,
+                                            secondaryAnimation) =>
+                                        const ProfileScreen(),
+                                    transitionsBuilder: (context, animation,
+                                        secondaryAnimation, child) {
+                                      const begin = Offset(1.0, 0.0);
+                                      const end = Offset.zero;
+                                      const curve = Curves.ease;
+
+                                      var tween = Tween(begin: begin, end: end)
+                                          .chain(CurveTween(curve: curve));
+
+                                      return SlideTransition(
+                                        position: animation.drive(tween),
+                                        child: child,
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
                             ),
                             IconButton(
                               onPressed: _handleSignOut,
@@ -471,7 +504,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   ),
                 ),
               ),
-              backgroundColor: AppTheme.primaryBlue,
+              backgroundColor: AppTheme.skyBlueDark,
             ),
 
             // ── Content ───────────────────────────────────────────────────────
@@ -484,20 +517,29 @@ class _DashboardScreenState extends State<DashboardScreen>
                       style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: AppTheme.textDark)),
+                          color: textPrimary)),
                   const SizedBox(height: 12),
                   Row(children: [
                     _quickAction(
                       icon: Icons.add_circle_outline_rounded,
                       label: 'Add\nExpense',
                       color: const Color(0xFFFF6B6B),
-                      onTap: () {},
+                      onTap: () async {
+                        final saved = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const AddExpenseScreen()),
+                        );
+                        if (saved == true && mounted) {
+                          await _loadPiggyBank();
+                        }
+                      },
                     ),
                     const SizedBox(width: 10),
                     _quickAction(
                       icon: Icons.pie_chart_outline_rounded,
                       label: 'Budget\nPlan',
-                      color: const Color(0xFF8B5CF6),
+                      color: const Color(0xFF0EA5E9),
                       onTap: _showSetBudgetDialog,
                     ),
                     const SizedBox(width: 10),
@@ -512,7 +554,13 @@ class _DashboardScreenState extends State<DashboardScreen>
                       icon: Icons.bar_chart_rounded,
                       label: 'Reports',
                       color: const Color(0xFFF59E0B),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const ReportsScreen()),
+                        );
+                      },
                     ),
                   ]),
                   const SizedBox(height: 22),
@@ -528,7 +576,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: AppTheme.textDark)),
+                          color: textPrimary)),
                   const SizedBox(height: 10),
                   BudgetCard(
                     budget: _budget,
@@ -542,7 +590,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: AppTheme.textDark)),
+                          color: textPrimary)),
                   const SizedBox(height: 10),
                   PiggyBankCard(
                     totalSaved: _piggyTotal,
@@ -589,18 +637,18 @@ class _DashboardScreenState extends State<DashboardScreen>
                           style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: AppTheme.textDark)),
+                              color: textPrimary)),
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryBlue.withValues(alpha: 0.08),
+                          color: AppTheme.skyBlueDark.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text('${_expenses.length} this month',
                             style: GoogleFonts.poppins(
                                 fontSize: 10,
-                                color: AppTheme.primaryBlue,
+                                color: AppTheme.skyBlueDark,
                                 fontWeight: FontWeight.w500)),
                       ),
                     ],
@@ -722,6 +770,13 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   // ── Monthly spending summary ───────────────────────────────────────────────────
   Widget _buildMonthlyCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppTheme.cardDark : Colors.white;
+    final textPrimary = isDark ? AppTheme.textDarkMode : AppTheme.textDark;
+    final shadowCol = isDark
+        ? Colors.black.withValues(alpha: 0.3)
+        : Colors.black.withValues(alpha: 0.05);
+
     final now = DateTime.now();
     final remaining = (_budget ?? 0) - _monthlySpent;
     final hasBudget = _budget != null && _budget! > 0;
@@ -729,13 +784,15 @@ class _DashboardScreenState extends State<DashboardScreen>
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.black.withValues(alpha: 0.05)),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 12,
-              offset: const Offset(0, 4)),
+              color: shadowCol, blurRadius: 20, offset: const Offset(0, 6))
         ],
       ),
       child: Row(children: [
@@ -746,7 +803,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 style: GoogleFonts.poppins(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: AppTheme.textDark)),
+                    color: textPrimary)),
             Text('From UPI transactions only',
                 style: GoogleFonts.poppins(
                     fontSize: 11, color: AppTheme.textMedium)),
@@ -776,23 +833,32 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   // ── Empty state ────────────────────────────────────────────────────────────────
   Widget _buildEmptyState() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppTheme.cardDark : Colors.white;
+    final textPrimary = isDark ? AppTheme.textDarkMode : AppTheme.textDark;
+    final shadowCol = isDark
+        ? Colors.black.withValues(alpha: 0.3)
+        : Colors.black.withValues(alpha: 0.03);
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 20),
       decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          color: cardBg,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.05)),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03), blurRadius: 8)
+                color: shadowCol, blurRadius: 20, offset: const Offset(0, 6))
           ]),
       child: Column(children: [
         Icon(Icons.sms_outlined, size: 44, color: AppTheme.textLight),
         const SizedBox(height: 10),
         Text('No UPI transactions this month',
             style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textDark)),
+                fontSize: 14, fontWeight: FontWeight.w600, color: textPrimary)),
         const SizedBox(height: 6),
         Text(
             'The app auto-reads your UPI debit SMS.\nGrant SMS permission to start tracking.',
@@ -807,8 +873,8 @@ class _DashboardScreenState extends State<DashboardScreen>
               style: GoogleFonts.poppins(
                   fontSize: 13, fontWeight: FontWeight.w500)),
           style: OutlinedButton.styleFrom(
-            foregroundColor: AppTheme.primaryBlue,
-            side: BorderSide(color: AppTheme.primaryBlue),
+            foregroundColor: AppTheme.skyBlueDark,
+            side: BorderSide(color: AppTheme.skyBlueDark),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -820,18 +886,24 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   // ── Transaction tile ───────────────────────────────────────────────────────────
   Widget _buildTransactionTile(Expense e) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppTheme.cardDark : AppTheme.cardWhite;
+    final textPrimary = isDark ? AppTheme.textDarkMode : AppTheme.textDark;
+    final shadow = isDark
+        ? Colors.black.withValues(alpha: 0.3)
+        : Colors.black.withValues(alpha: 0.03);
+    final bankChipBg =
+        isDark ? AppTheme.cardDarkElevated : Colors.grey.shade100;
+
     final color = AppTheme.errorRed;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 6,
-              offset: const Offset(0, 2))
+          BoxShadow(color: shadow, blurRadius: 10, offset: const Offset(0, 4))
         ],
       ),
       child: Row(children: [
@@ -853,7 +925,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                     style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
-                        color: AppTheme.textDark),
+                        color: textPrimary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis),
               ),
@@ -861,14 +933,14 @@ class _DashboardScreenState extends State<DashboardScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                  color: AppTheme.skyBlueDark.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text('UPI',
                     style: GoogleFonts.poppins(
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
-                        color: AppTheme.primaryBlue)),
+                        color: AppTheme.skyBlueDark)),
               ),
               if (e.bank != null) ...[
                 const SizedBox(width: 4),
@@ -876,7 +948,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                    color: bankChipBg,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(e.bank!,
@@ -909,19 +981,28 @@ class _DashboardScreenState extends State<DashboardScreen>
     required Color color,
     required VoidCallback onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? AppTheme.cardDark : Colors.white;
+    final textPrimary = isDark ? AppTheme.textDarkMode : AppTheme.textDark;
+    final shadowCol = isDark
+        ? Colors.black.withValues(alpha: 0.3)
+        : Colors.black.withValues(alpha: 0.05);
+
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
+            color: cardBg,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.black.withValues(alpha: 0.05)),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4))
+                  color: shadowCol, blurRadius: 8, offset: const Offset(0, 2))
             ],
           ),
           child: Column(children: [
@@ -938,7 +1019,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 style: GoogleFonts.poppins(
                     fontSize: 9,
                     fontWeight: FontWeight.w500,
-                    color: AppTheme.textDark,
+                    color: textPrimary,
                     height: 1.3)),
           ]),
         ),

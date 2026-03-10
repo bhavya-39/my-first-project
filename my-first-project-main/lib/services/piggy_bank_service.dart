@@ -72,14 +72,12 @@ class PiggyBankService {
   double _calculateSaving(double amount) {
     switch (_mode) {
       case SavingMode.roundoff:
-        // Round up to nearest ₹10 and save the difference
-        return (amount / 10).ceil() * 10 - amount;
+        double roundoff = (amount / 10).ceil() * 10 - amount;
+        return roundoff <= 0 ? 10.0 : double.parse(roundoff.toStringAsFixed(2));
       case SavingMode.fixed:
-        // Fixed amount per transaction
         return _fixedAmount;
       case SavingMode.percent:
-        // Percentage of transaction (rounded to nearest rupee)
-        return (amount * _percentage / 100).roundToDouble();
+        return amount * _percentage / 100;
     }
   }
 

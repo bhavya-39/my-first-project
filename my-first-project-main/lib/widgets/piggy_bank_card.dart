@@ -1,9 +1,10 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_theme.dart';
 import '../services/piggy_bank_service.dart';
 
-/// Displays the piggy bank savings with a mode selector.
-/// Supports: Round-off, Fixed ₹10, and Percentage saving.
+/// Glassmorphism Piggy Bank Card — light + dark fintech theme.
 class PiggyBankCard extends StatelessWidget {
   final double totalSaved;
   final int savingsCount;
@@ -38,183 +39,190 @@ class PiggyBankCard extends StatelessWidget {
   String _modeDescription(SavingMode mode) {
     switch (mode) {
       case SavingMode.roundoff:
-        return 'Spare change (round-up to ₹10) saved per UPI payment';
+        return 'Spare change saved by rounding each expense.';
       case SavingMode.fixed:
-        return '₹${fixedAmount.toStringAsFixed(0)} saved for every UPI payment';
+        return '₹${fixedAmount.toStringAsFixed(0)} saved for every expense.';
       case SavingMode.percent:
-        return '${percentage.toStringAsFixed(0)}% of each UPI payment saved';
+        return '${percentage.toStringAsFixed(0)}% saved from every expense.';
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // ── Theme-aware colors ──────────────────────────────────────────────
+    final textPrimary = AppTheme.textDark;
+    final textSub = AppTheme.textMedium;
+    final textDetail = AppTheme.skyBlueDark;
+    final cardBg = AppTheme.cardWhite;
+    final borderColor = Colors.grey.shade200;
+    final shadowColor = Colors.black.withValues(alpha: 0.05);
+
+    final infoBg = AppTheme.skyBlueDark.withValues(alpha: 0.08);
+    final inactiveBg = AppTheme.backgroundLight;
+    final inactiveBorder = Colors.grey.shade300;
+    final inactiveText = AppTheme.textMedium;
+    final inactiveIcon = AppTheme.textLight;
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF10B981), Color(0xFF059669)],
-        ),
+        color: cardBg,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF10B981).withValues(alpha: 0.3),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
+              color: shadowColor, blurRadius: 20, offset: const Offset(0, 6)),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Header ──────────────────────────────────────────────────────
+          // ── Header ──────────────────────────────────────────────
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(10),
+                  color: AppTheme.skyBlue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Text('🐷', style: TextStyle(fontSize: 18)),
+                child: ShaderMask(
+                  shaderCallback: (bounds) =>
+                      AppTheme.primaryGradient.createShader(bounds),
+                  child: const Text('🐷', style: TextStyle(fontSize: 20)),
+                ),
               ),
-              const SizedBox(width: 10),
-              Text(
-                'Piggy Bank',
-                style: GoogleFonts.poppins(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white),
-              ),
+              const SizedBox(width: 12),
+              Text('Piggy Bank',
+                  style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: textPrimary)),
               const Spacer(),
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: AppTheme.skyBlue.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(20),
-                  border:
-                      Border.all(color: Colors.white.withValues(alpha: 0.4)),
+                  border: Border.all(
+                      color: AppTheme.skyBlue.withValues(alpha: 0.15)),
                 ),
-                child: Text(
-                  _modeLabel(currentMode),
-                  style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500),
-                ),
+                child: Text(_modeLabel(currentMode),
+                    style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        color: textDetail,
+                        fontWeight: FontWeight.w600)),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 22),
 
-          // ── Savings Amount ──────────────────────────────────────────────
-          Text(
-            '₹${totalSaved.toStringAsFixed(0)}',
-            style: GoogleFonts.poppins(
-                fontSize: 32, fontWeight: FontWeight.w800, color: Colors.white),
+          // ── Savings Amount ──────────────────────────────────────
+          ShaderMask(
+            shaderCallback: (bounds) =>
+                AppTheme.primaryGradient.createShader(bounds),
+            child: Text('₹${totalSaved.toStringAsFixed(0)}',
+                style: GoogleFonts.poppins(
+                    fontSize: 36,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white)),
           ),
           const SizedBox(height: 4),
-          Text(
-            'Saved from $savingsCount transaction${savingsCount != 1 ? 's' : ''} this month',
-            style: GoogleFonts.poppins(
-                fontSize: 12, color: Colors.white.withValues(alpha: 0.8)),
-          ),
-          const SizedBox(height: 14),
-
-          // ── Info banner ─────────────────────────────────────────────────
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.info_outline_rounded,
-                    color: Colors.white, size: 14),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    _modeDescription(currentMode),
-                    style: GoogleFonts.poppins(
-                        fontSize: 11,
-                        color: Colors.white.withValues(alpha: 0.9)),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          Text('Saved from $savingsCount transactions this month',
+              style: GoogleFonts.poppins(fontSize: 12, color: textSub)),
           const SizedBox(height: 16),
 
-          // ── Mode Selector ───────────────────────────────────────────────
-          Text(
-            'Saving Mode',
-            style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Colors.white.withValues(alpha: 0.9)),
+          // ── Info banner ────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: infoBg,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                  color: AppTheme.skyBlueDark.withValues(alpha: 0.15)),
+            ),
+            child: Row(children: [
+              Icon(Icons.info_outline_rounded, color: textDetail, size: 16),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(_modeDescription(currentMode),
+                    style: GoogleFonts.poppins(
+                        fontSize: 11, color: textDetail, height: 1.3)),
+              ),
+            ]),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 18),
+
+          // ── Mode Selector ──────────────────────────────────────
+          Text('Saving Mode',
+              style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: textPrimary)),
+          const SizedBox(height: 10),
           Row(
             children: SavingMode.values.map((mode) {
               final isActive = mode == currentMode;
               return Expanded(
                 child: GestureDetector(
                   onTap: () => onModeChanged(mode),
-                  child: Container(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
                     margin: EdgeInsets.only(
                         right: mode != SavingMode.percent ? 8 : 0),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: isActive
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
+                      gradient: isActive ? AppTheme.primaryGradient : null,
+                      color: isActive ? null : inactiveBg,
+                      borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: isActive
-                            ? Colors.white
-                            : Colors.white.withValues(alpha: 0.3),
+                        color: isActive ? Colors.transparent : inactiveBorder,
+                        width: isActive ? 0 : 1.5,
                       ),
+                      boxShadow: isActive
+                          ? [
+                              BoxShadow(
+                                color: AppTheme.skyBlue
+                                    .withValues(alpha: 0.25),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              )
+                            ]
+                          : null,
                     ),
-                    child: Column(
-                      children: [
-                        Icon(
-                          mode == SavingMode.roundoff
-                              ? Icons.swap_vert_rounded
-                              : mode == SavingMode.fixed
-                                  ? Icons.savings_rounded
-                                  : Icons.percent_rounded,
-                          size: 18,
-                          color:
-                              isActive ? const Color(0xFF059669) : Colors.white,
+                    child: Column(children: [
+                      Icon(
+                        mode == SavingMode.roundoff
+                            ? Icons.swap_vert_rounded
+                            : mode == SavingMode.fixed
+                                ? Icons.savings_rounded
+                                : Icons.percent_rounded,
+                        size: 22,
+                        color: isActive ? Colors.white : inactiveIcon,
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        mode == SavingMode.roundoff
+                            ? 'Round-off'
+                            : mode == SavingMode.fixed
+                                ? 'Fixed'
+                                : 'Percent',
+                        style: GoogleFonts.poppins(
+                          fontSize: 11,
+                          fontWeight:
+                              isActive ? FontWeight.w600 : FontWeight.w500,
+                          color: isActive ? Colors.white : inactiveText,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          mode == SavingMode.roundoff
-                              ? 'Round-off'
-                              : mode == SavingMode.fixed
-                                  ? 'Fixed'
-                                  : 'Percent',
-                          style: GoogleFonts.poppins(
-                            fontSize: 11,
-                            fontWeight:
-                                isActive ? FontWeight.w600 : FontWeight.w500,
-                            color: isActive
-                                ? const Color(0xFF059669)
-                                : Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ]),
                   ),
                 ),
               );
             }).toList(),
           ),
 
-          // ── Percentage picker (only for percent mode) ───────────────────
+          // ── Percentage picker ──────────────────────────────────
           if (currentMode == SavingMode.percent) ...[
             const SizedBox(height: 14),
             Row(
@@ -223,26 +231,24 @@ class PiggyBankCard extends StatelessWidget {
                 return Expanded(
                   child: GestureDetector(
                     onTap: () => onPercentageChanged(pct),
-                    child: Container(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
                       margin: EdgeInsets.only(right: pct != 20.0 ? 6 : 0),
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 9),
                       decoration: BoxDecoration(
-                        color: isActive
-                            ? Colors.white
-                            : Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(8),
+                        gradient: isActive ? AppTheme.primaryGradient : null,
+                        color: isActive ? null : inactiveBg,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                            color:
+                                isActive ? Colors.transparent : inactiveBorder),
                       ),
                       child: Center(
-                        child: Text(
-                          '${pct.toStringAsFixed(0)}%',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: isActive
-                                ? const Color(0xFF059669)
-                                : Colors.white,
-                          ),
-                        ),
+                        child: Text('${pct.toStringAsFixed(0)}%',
+                            style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: isActive ? Colors.white : inactiveText)),
                       ),
                     ),
                   ),

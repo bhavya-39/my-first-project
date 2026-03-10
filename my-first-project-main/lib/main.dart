@@ -7,12 +7,17 @@ import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'theme/app_theme.dart';
 import 'services/notification_service.dart';
+import 'services/theme_provider.dart';
+import 'services/profile_photo_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  // Load persisted theme preference before painting
+  await ThemeProvider.instance.load();
+  await ProfilePhotoService.instance.loadProfilePhoto();
   // Initialize local notifications + background budget check task
   await NotificationService.init();
   runApp(const StudentMoneyManagerApp());
@@ -23,11 +28,19 @@ class StudentMoneyManagerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Student Money Manager',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: const SplashScreen(),
+    // ListenableBuilder re-builds whenever ThemeProvider notifies (toggle).
+    return ListenableBuilder(
+      listenable: ThemeProvider.instance,
+      builder: (context, _) {
+        return MaterialApp(
+          title: 'Student Money Manager',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeProvider.instance.themeMode,
+          home: const SplashScreen(),
+        );
+      },
     );
   }
 }

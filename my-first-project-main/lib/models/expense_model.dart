@@ -8,6 +8,7 @@ class Expense {
   final String? bank;
   final DateTime date;
   final String? note;
+  final String paymentMethod; // 'UPI' or 'Cash'
   final bool needsReview;
   final int confidence; // 0–100
   final bool synced;
@@ -21,6 +22,7 @@ class Expense {
     this.bank,
     required this.date,
     this.note,
+    this.paymentMethod = 'UPI',
     this.needsReview = false,
     this.confidence = 100,
     this.synced = false,
@@ -32,6 +34,7 @@ class Expense {
         'merchant': merchant,
         'category': category,
         'bank': bank,
+        'payment_method': paymentMethod,
         'date': date.millisecondsSinceEpoch,
         'note': note,
         'needs_review': needsReview ? 1 : 0,
@@ -46,6 +49,7 @@ class Expense {
         merchant: m['merchant'] as String,
         category: m['category'] as String,
         bank: m['bank'] as String?,
+        paymentMethod: (m['payment_method'] as String?) ?? 'UPI',
         date: DateTime.fromMillisecondsSinceEpoch(m['date'] as int),
         note: m['note'] as String?,
         needsReview: (m['needs_review'] as int) == 1,
@@ -53,7 +57,8 @@ class Expense {
         synced: (m['synced'] as int) == 1,
       );
 
-  Expense copyWith({bool? needsReview, bool? synced}) => Expense(
+  Expense copyWith({bool? needsReview, bool? synced, String? paymentMethod}) =>
+      Expense(
         id: id,
         hash: hash,
         amount: amount,
@@ -62,6 +67,7 @@ class Expense {
         bank: bank,
         date: date,
         note: note,
+        paymentMethod: paymentMethod ?? this.paymentMethod,
         needsReview: needsReview ?? this.needsReview,
         confidence: confidence,
         synced: synced ?? this.synced,

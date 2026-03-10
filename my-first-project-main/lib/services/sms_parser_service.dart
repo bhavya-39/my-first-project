@@ -20,6 +20,8 @@ const _trustedSenders = {
   'KOTAKBK', 'KOTAK',
   // Yes
   'YESBNK', 'YESBANK',
+  // Canara Bank
+  'CANBNK', 'CANARA', 'CANARABANK',
   // IndusInd / Bank of Baroda / PNB
   'INDBNK', 'INDIBNK', 'BOBBNK', 'PNBSMS',
   // UPI apps
@@ -75,36 +77,127 @@ final _merchantNoise = RegExp(
 // ── Category keyword mapping ──────────────────────────────────────────────────
 const _categoryKeywords = <String, List<String>>{
   'Food': [
-    'zomato', 'swiggy', 'dominos', 'kfc', 'mcdonalds', 'subway', 'pizza',
-    'starbucks', 'cafe', 'restaurant', 'food', 'eat', 'biryani', 'haldirams',
-    'blinkit', 'zepto', 'dunzo', 'groceries', 'bigbasket', 'grofer',
+    'zomato',
+    'swiggy',
+    'dominos',
+    'kfc',
+    'mcdonalds',
+    'subway',
+    'pizza',
+    'starbucks',
+    'cafe',
+    'restaurant',
+    'food',
+    'eat',
+    'biryani',
+    'haldirams',
+    'blinkit',
+    'zepto',
+    'dunzo',
+    'groceries',
+    'bigbasket',
+    'grofer',
   ],
   'Shopping': [
-    'amazon', 'flipkart', 'myntra', 'meesho', 'ajio', 'nykaa', 'firstcry',
-    'snapdeal', 'tatacliq', 'shopping', 'store', 'mart', 'mall',
+    'amazon',
+    'flipkart',
+    'myntra',
+    'meesho',
+    'ajio',
+    'nykaa',
+    'firstcry',
+    'snapdeal',
+    'tatacliq',
+    'shopping',
+    'store',
+    'mart',
+    'mall',
   ],
   'Transport': [
-    'uber', 'ola', 'rapido', 'metro', 'irctc', 'railway', 'bus', 'flight',
-    'makemytrip', 'yatra', 'easemytrip', 'petrol', 'fuel', 'parking',
+    'uber',
+    'ola',
+    'rapido',
+    'metro',
+    'irctc',
+    'railway',
+    'bus',
+    'flight',
+    'makemytrip',
+    'yatra',
+    'easemytrip',
+    'petrol',
+    'fuel',
+    'parking',
   ],
   'Entertainment': [
-    'netflix', 'hotstar', 'spotify', 'prime', 'sony', 'zee', 'bookmyshow',
-    'inox', 'pvr', 'youtube', 'apple', 'game', 'play store',
+    'netflix',
+    'hotstar',
+    'spotify',
+    'prime',
+    'sony',
+    'zee',
+    'bookmyshow',
+    'inox',
+    'pvr',
+    'youtube',
+    'apple',
+    'game',
+    'play store',
   ],
   'Utilities': [
-    'electricity', 'water', 'gas', 'broadband', 'jio', 'airtel', 'vi ',
-    'bsnl', 'tata sky', 'dth', 'recharge', 'postpaid', 'prepaid', 'internet',
+    'electricity',
+    'water',
+    'gas',
+    'broadband',
+    'jio',
+    'airtel',
+    'vi ',
+    'bsnl',
+    'tata sky',
+    'dth',
+    'recharge',
+    'postpaid',
+    'prepaid',
+    'internet',
   ],
   'Health': [
-    'hospital', 'clinic', 'pharmacy', 'medical', 'doctor', 'lab', 'test',
-    'medicine', 'apollo', 'fortis', 'max hospital', 'netmeds', '1mg', 'pharmeasy',
+    'hospital',
+    'clinic',
+    'pharmacy',
+    'medical',
+    'doctor',
+    'lab',
+    'test',
+    'medicine',
+    'apollo',
+    'fortis',
+    'max hospital',
+    'netmeds',
+    '1mg',
+    'pharmeasy',
   ],
   'Education': [
-    'school', 'college', 'university', 'byju', 'unacademy', 'vedantu',
-    'udemy', 'coursera', 'upgrad', 'fees', 'tuition', 'books', 'stationery',
+    'school',
+    'college',
+    'university',
+    'byju',
+    'unacademy',
+    'vedantu',
+    'udemy',
+    'coursera',
+    'upgrad',
+    'fees',
+    'tuition',
+    'books',
+    'stationery',
   ],
   'Transfers': [
-    'transfer', 'send money', 'neft', 'imps', 'rtgs', 'bank transfer',
+    'transfer',
+    'send money',
+    'neft',
+    'imps',
+    'rtgs',
+    'bank transfer',
   ],
 };
 
@@ -167,28 +260,31 @@ class SmsParserService {
     // ── Step 2: Context-aware amount extraction ────────────────────────────
     double? bestAmount;
     int minDistanceToDebit = 999999;
-    
+
     // Find all occurrences of amount patterns
     final matches = <RegExpMatch>[];
     for (final pattern in _amountPatterns) {
       matches.addAll(pattern.allMatches(body));
     }
-    
+
     final debitMatches = _debitWords.allMatches(body).toList();
     if (debitMatches.isEmpty) return null; // Must have debit words
 
     // Balance keywords to ignore
-    final balanceWords = RegExp(r'\b(bal(ance)?|avl|available|limit)\b', caseSensitive: false);
+    final balanceWords =
+        RegExp(r'\b(bal(ance)?|avl|available|limit)\b', caseSensitive: false);
     final balanceMatches = balanceWords.allMatches(body).toList();
-    
+
     for (final m in matches) {
       final raw = m.group(1)!.replaceAll(',', '');
       final amountCandidate = double.tryParse(raw);
       // Ignore invalid, zero, or excessively large amounts > ₹5,00,000
-      if (amountCandidate == null || amountCandidate <= 0 || amountCandidate > 500000) continue;
-      
+      if (amountCandidate == null ||
+          amountCandidate <= 0 ||
+          amountCandidate > 500000) continue;
+
       final amountIndex = m.start;
-      
+
       // Check if this amount is right next to a balance/limit keyword (e.g. within 30 chars)
       bool nearBalance = false;
       for (final bm in balanceMatches) {
@@ -198,7 +294,7 @@ class SmsParserService {
         }
       }
       if (nearBalance) continue; // Ignore balance amounts
-      
+
       // Calculate distance to nearest debit keyword
       int distanceToDebit = 999999;
       for (final dm in debitMatches) {
@@ -207,14 +303,14 @@ class SmsParserService {
           distanceToDebit = dist;
         }
       }
-      
+
       // Select the amount closest to a debit keyword
       if (distanceToDebit < minDistanceToDebit) {
         minDistanceToDebit = distanceToDebit;
         bestAmount = amountCandidate;
       }
     }
-    
+
     if (bestAmount == null) return null; // No valid amount found
     double amount = bestAmount;
 
@@ -223,8 +319,7 @@ class SmsParserService {
     score += 30; // passed debit word check
 
     final normalizedSender = sender?.toUpperCase().replaceAll('-', '') ?? '';
-    final isTrusted = _trustedSenders.any(
-        (s) => normalizedSender.contains(s));
+    final isTrusted = _trustedSenders.any((s) => normalizedSender.contains(s));
     if (isTrusted) score += 20;
 
     // ── Step 4: Merchant extraction ───────────────────────────────────────
@@ -285,17 +380,22 @@ class SmsParserService {
     if (sender.contains('AXIS')) return 'Axis Bank';
     if (sender.contains('KOTAK')) return 'Kotak Bank';
     if (sender.contains('YES')) return 'Yes Bank';
+    if (sender.contains('CANARA') || sender.contains('CANBNK'))
+      return 'Canara Bank';
     if (sender.contains('PAYTM') || sender.contains('PYTM')) return 'Paytm';
-    if (sender.contains('GPAY') || sender.contains('GOOGLE')) return 'Google Pay';
+    if (sender.contains('GPAY') || sender.contains('GOOGLE'))
+      return 'Google Pay';
     if (sender.contains('PHONE') || sender.contains('PHONPE')) return 'PhonePe';
-    if (sender.contains('AMAZON') || sender.contains('AMZN')) return 'Amazon Pay';
+    if (sender.contains('AMAZON') || sender.contains('AMZN'))
+      return 'Amazon Pay';
     return null;
   }
 
   String _toTitleCase(String s) {
     return s
         .split(' ')
-        .map((w) => w.isEmpty ? w : w[0].toUpperCase() + w.substring(1).toLowerCase())
+        .map((w) =>
+            w.isEmpty ? w : w[0].toUpperCase() + w.substring(1).toLowerCase())
         .join(' ');
   }
 }

@@ -19,7 +19,7 @@ class LocalDatabase {
     final path = join(dbPath, 'fintrack.db');
     return openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -36,6 +36,7 @@ class LocalDatabase {
         bank        TEXT,
         date        INTEGER NOT NULL,
         note        TEXT,
+        payment_method TEXT DEFAULT 'UPI',
         needs_review INTEGER DEFAULT 0,
         confidence  INTEGER DEFAULT 100,
         synced      INTEGER DEFAULT 0
@@ -109,6 +110,11 @@ class LocalDatabase {
         'percentage': 5.0,
         'fixed_amount': 10.0,
       });
+    }
+    if (oldVersion < 4) {
+      await db.execute(
+        "ALTER TABLE expenses ADD COLUMN payment_method TEXT DEFAULT 'UPI'",
+      );
     }
   }
 

@@ -134,7 +134,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.primaryTeal.withValues(alpha: 0.3),
+                color: AppTheme.skyBlue.withValues(alpha: 0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -196,7 +196,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
                   decoration: const InputDecoration(
                     hintText: 'you@university.edu',
                     prefixIcon: Icon(Icons.email_outlined,
-                        color: AppTheme.primaryTeal),
+                        color: AppTheme.skyBlue),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -288,7 +288,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen>
               'Try a different email',
               style: GoogleFonts.poppins(
                 fontSize: 14,
-                color: AppTheme.primaryTeal,
+                color: AppTheme.skyBlue,
                 fontWeight: FontWeight.w500,
               ),
             ),
