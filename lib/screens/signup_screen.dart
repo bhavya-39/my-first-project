@@ -180,7 +180,7 @@ class _SignupScreenState extends State<SignupScreen>
                         decoration: const InputDecoration(
                           hintText: 'John Doe',
                           prefixIcon: Icon(Icons.person_outline,
-                              color: AppTheme.primaryTeal),
+                              color: AppTheme.skyBlue),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
@@ -203,7 +203,7 @@ class _SignupScreenState extends State<SignupScreen>
                         decoration: const InputDecoration(
                           hintText: 'you@university.edu',
                           prefixIcon: Icon(Icons.email_outlined,
-                              color: AppTheme.primaryTeal),
+                              color: AppTheme.skyBlue),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
@@ -227,7 +227,7 @@ class _SignupScreenState extends State<SignupScreen>
                         decoration: InputDecoration(
                           hintText: 'Min. 6 characters',
                           prefixIcon: const Icon(Icons.lock_outline,
-                              color: AppTheme.primaryTeal),
+                              color: AppTheme.skyBlue),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
@@ -265,7 +265,7 @@ class _SignupScreenState extends State<SignupScreen>
                         decoration: InputDecoration(
                           hintText: 'Re-enter your password',
                           prefixIcon: const Icon(Icons.lock_outline,
-                              color: AppTheme.primaryTeal),
+                              color: AppTheme.skyBlue),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscureConfirm
@@ -316,7 +316,7 @@ class _SignupScreenState extends State<SignupScreen>
                       'Login',
                       style: GoogleFonts.poppins(
                         fontSize: 14,
-                        color: AppTheme.primaryTeal,
+                        color: AppTheme.skyBlue,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

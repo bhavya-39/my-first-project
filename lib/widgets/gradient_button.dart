@@ -29,14 +29,14 @@ class GradientButton extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: colors ??
-                [AppTheme.primaryTeal, AppTheme.primaryBlue],
+                [AppTheme.skyBlue, AppTheme.skyBlueDark],
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.primaryTeal.withValues(alpha: 0.35),
+              color: AppTheme.skyBlue.withValues(alpha: 0.35),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),

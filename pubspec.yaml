@@ -27,8 +27,16 @@ dependencies:
   permission_handler: ^11.3.1
   crypto: ^3.0.3
 
+<<<<<<< HEAD:pubspec.yaml
   # Real-time UPI push notification capture
   notification_listener_service: ^0.3.5
+=======
+  # Charts
+  fl_chart: ^0.70.2
+
+  # Preferences
+  shared_preferences: ^2.3.5
+>>>>>>> 6752cd844703b38679140fb7b3ac365ea543d677:my-first-project-main/pubspec.yaml
 
   # Local Database
   sqflite: ^2.3.3
@@ -37,6 +45,10 @@ dependencies:
   # Background Notifications
   flutter_local_notifications: ^18.0.1
   workmanager: ^0.9.0
+  image_picker: ^1.2.1
+  image_cropper: ^11.0.0
+  path_provider: ^2.1.5
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:

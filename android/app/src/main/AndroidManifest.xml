@@ -37,6 +37,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+<<<<<<< HEAD:android/app/src/main/AndroidManifest.xml
 
         <!-- notification_listener_service package — required for UPI push notification capture -->
         <service
@@ -48,6 +49,13 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
+=======
+        <!-- Required by image_cropper -->
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+>>>>>>> 6752cd844703b38679140fb7b3ac365ea543d677:my-first-project-main/android/app/src/main/AndroidManifest.xml
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

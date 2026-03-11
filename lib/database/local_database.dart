@@ -19,7 +19,11 @@ class LocalDatabase {
     final path = join(dbPath, 'fintrack.db');
     return openDatabase(
       path,
+<<<<<<< HEAD:lib/database/local_database.dart
       version: 1,
+=======
+      version: 4,
+>>>>>>> 6752cd844703b38679140fb7b3ac365ea543d677:my-first-project-main/lib/database/local_database.dart
       onCreate: _onCreate,
     );
   }
@@ -35,6 +39,7 @@ class LocalDatabase {
         bank        TEXT,
         date        INTEGER NOT NULL,
         note        TEXT,
+        payment_method TEXT DEFAULT 'UPI',
         needs_review INTEGER DEFAULT 0,
         confidence  INTEGER DEFAULT 100,
         synced      INTEGER DEFAULT 0
@@ -55,6 +60,59 @@ class LocalDatabase {
         'CREATE INDEX idx_expenses_date ON expenses(date)');
     await db.execute(
         'CREATE INDEX idx_expenses_needs_review ON expenses(needs_review)');
+<<<<<<< HEAD:lib/database/local_database.dart
+=======
+
+    await db.execute('''
+      CREATE TABLE piggy_settings (
+        id             INTEGER PRIMARY KEY CHECK (id = 1),
+        mode           TEXT    NOT NULL DEFAULT 'roundoff',
+        percentage     REAL    NOT NULL DEFAULT 5.0,
+        fixed_amount   REAL    NOT NULL DEFAULT 10.0
+      )
+    ''');
+    await db.insert('piggy_settings', {
+      'id': 1,
+      'mode': 'roundoff',
+      'percentage': 5.0,
+      'fixed_amount': 10.0,
+    });
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('''
+        CREATE TABLE monthly_savings (
+          id              INTEGER PRIMARY KEY AUTOINCREMENT,
+          month           TEXT    UNIQUE NOT NULL,
+          total_expenses  REAL    NOT NULL,
+          budget          REAL    NOT NULL,
+          savings         REAL    NOT NULL
+        )
+      ''');
+    }
+    if (oldVersion < 3) {
+      await db.execute('''
+        CREATE TABLE piggy_settings (
+          id             INTEGER PRIMARY KEY CHECK (id = 1),
+          mode           TEXT    NOT NULL DEFAULT 'roundoff',
+          percentage     REAL    NOT NULL DEFAULT 5.0,
+          fixed_amount   REAL    NOT NULL DEFAULT 10.0
+        )
+      ''');
+      await db.insert('piggy_settings', {
+        'id': 1,
+        'mode': 'roundoff',
+        'percentage': 5.0,
+        'fixed_amount': 10.0,
+      });
+    }
+    if (oldVersion < 4) {
+      await db.execute(
+        "ALTER TABLE expenses ADD COLUMN payment_method TEXT DEFAULT 'UPI'",
+      );
+    }
+>>>>>>> 6752cd844703b38679140fb7b3ac365ea543d677:my-first-project-main/lib/database/local_database.dart
   }
 
   // ── Expenses ────────────────────────────────────────────────────────────────
