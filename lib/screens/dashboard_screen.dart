@@ -46,12 +46,10 @@ class _DashboardScreenState extends State<DashboardScreen>
   late StreamSubscription<List<Expense>> _expensesSub;
   late StreamSubscription<Map<String, double>> _categorySub;
   late StreamSubscription<double> _totalSub;
-  late StreamSubscription<List<Expense>> _reviewSub;
 
   List<Expense> _expenses = [];
   Map<String, double> _categories = {};
   double _monthlySpent = 0;
-  List<Expense> _pendingReview = [];
   double _piggyTotal = 0;
   int _piggyCount = 0;
   double? _budget;
@@ -82,9 +80,6 @@ class _DashboardScreenState extends State<DashboardScreen>
         _checkBudgetAlerts();
       }
     });
-    _reviewSub = _repository.reviewStream.listen((r) {
-      if (mounted) setState(() => _pendingReview = r);
-    });
 
     // Initial load
     _repository.refresh();
@@ -101,8 +96,8 @@ class _DashboardScreenState extends State<DashboardScreen>
 
 
   Future<void> _loadPiggyBank() async {
-    final total = await _piggyBank.getTotalSavings();
-    final count = await _piggyBank.getSavingsCount();
+    final total = await _piggyBank.getMonthlySavings();
+    final count = await _piggyBank.getMonthlySavingsCount();
     if (mounted) setState(() { _piggyTotal = total; _piggyCount = count; });
   }
 
@@ -142,12 +137,7 @@ class _DashboardScreenState extends State<DashboardScreen>
       setState(() => _syncing = false);
       if (!silent || count > 0) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-<<<<<<< HEAD:lib/screens/dashboard_screen.dart
-          backgroundColor: count > 0 ? AppTheme.successGreen : AppTheme.primaryBlue,
-=======
-          backgroundColor:
-              count > 0 ? AppTheme.successGreen : AppTheme.skyBlueDark,
->>>>>>> 6752cd844703b38679140fb7b3ac365ea543d677:my-first-project-main/lib/screens/dashboard_screen.dart
+          backgroundColor: count > 0 ? AppTheme.successGreen : AppTheme.skyBlueDark,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           content: Row(children: [
@@ -285,93 +275,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  // ── Review workflow: confirm / reject low-confidence transactions ────────────
-  Future<void> _showReviewDialog(Expense expense) async {
-    await showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-                color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(8)),
-            child: const Icon(Icons.help_outline_rounded,
-                color: Color(0xFFF59E0B), size: 18),
-          ),
-          const SizedBox(width: 8),
-          const Flexible(
-            child: Text('Review Transaction',
-                style: TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w700)),
-          ),
-        ]),
-        content: Column(mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _reviewRow('Merchant', expense.merchant),
-          _reviewRow('Amount', '₹${expense.amount.toStringAsFixed(2)}'),
-          _reviewRow('Category', expense.category),
-          _reviewRow('Date', '${expense.date.day}/${expense.date.month}/${expense.date.year}'),
-          if (expense.bank != null) _reviewRow('Bank', expense.bank!),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-                color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8)),
-            child: Text(
-              'Confidence: ${expense.confidence}% — Please verify this transaction',
-              style: GoogleFonts.poppins(
-                  fontSize: 11, color: const Color(0xFFF59E0B)),
-            ),
-          ),
-        ]),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              await _repository.rejectExpense(expense.id!);
-              await _loadPiggyBank();
-              if (ctx.mounted) Navigator.pop(ctx);
-            },
-            child: Text('❌ Reject',
-                style: GoogleFonts.poppins(color: AppTheme.errorRed,
-                    fontWeight: FontWeight.w600)),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              await _repository.confirmExpense(expense.id!);
-              if (ctx.mounted) Navigator.pop(ctx);
-            },
-            style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.successGreen,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10))),
-            child: Text('✅ Confirm',
-                style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _reviewRow(String label, String value) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 3),
-        child: Row(children: [
-          SizedBox(
-            width: 72,
-            child: Text(label,
-                style: GoogleFonts.poppins(
-                    fontSize: 12, color: AppTheme.textMedium)),
-          ),
-          Flexible(
-            child: Text(value,
-                style: GoogleFonts.poppins(
-                    fontSize: 12, fontWeight: FontWeight.w600)),
-          ),
-        ]),
-      );
 
   @override
   void dispose() {
@@ -379,7 +282,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     _expensesSub.cancel();
     _categorySub.cancel();
     _totalSub.cancel();
-    _reviewSub.cancel();
     super.dispose();
   }
 
@@ -540,9 +442,6 @@ class _DashboardScreenState extends State<DashboardScreen>
                       color: const Color(0xFF0EA5E9),
                       onTap: _syncing ? () {} : () => _syncSms(),
                     ),
-<<<<<<< HEAD:lib/screens/dashboard_screen.dart
-
-=======
                     const SizedBox(width: 10),
                     _quickAction(
                       icon: Icons.bar_chart_rounded,
@@ -556,15 +455,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                         );
                       },
                     ),
->>>>>>> 6752cd844703b38679140fb7b3ac365ea543d677:my-first-project-main/lib/screens/dashboard_screen.dart
                   ]),
                   const SizedBox(height: 22),
-
-                  // ── Pending Review banner ──────────────────────────────────
-                  if (_pendingReview.isNotEmpty) ...[
-                    _buildReviewBanner(),
-                    const SizedBox(height: 20),
-                  ],
 
                   // ── Budget Card ────────────────────────────────────────────
                   Text('Budget Tracker',
@@ -590,10 +482,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                   PiggyBankCard(
                     totalSaved: _piggyTotal,
                     savingsCount: _piggyCount,
-                    savingsRate: _piggyBank.savingsRate,
-                    onRateChanged: (r) {
-                      _piggyBank.setSavingsRate(r);
-                      setState(() {});
+                    onSettingsChanged: () async {
+                      await _loadPiggyBank();
+                      if (mounted) setState(() {});
                     },
                   ),
                   const SizedBox(height: 22),
@@ -652,102 +543,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-  // ── Review Banner ─────────────────────────────────────────────────────────────
-  Widget _buildReviewBanner() {
-    return GestureDetector(
-      onTap: () {
-        showModalBottomSheet<void>(
-          context: context,
-          isScrollControlled: true,
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-          builder: (ctx) => DraggableScrollableSheet(
-            initialChildSize: 0.6,
-            maxChildSize: 0.9,
-            minChildSize: 0.4,
-            expand: false,
-            builder: (_, controller) => Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-              child: Column(children: [
-                Container(
-                    width: 36,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(2))),
-                Text('Needs Review',
-                    style: GoogleFonts.poppins(
-                        fontSize: 16, fontWeight: FontWeight.w700)),
-                Text(
-                    'Low-confidence transactions — tap to confirm or reject',
-                    style: GoogleFonts.poppins(
-                        fontSize: 11, color: AppTheme.textMedium)),
-                const SizedBox(height: 14),
-                Expanded(
-                  child: ListView(controller: controller, children: [
-                    ..._pendingReview.map((e) => ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(Icons.help_outline_rounded,
-                                color: Color(0xFFF59E0B), size: 18),
-                          ),
-                          title: Text(e.merchant,
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.w600, fontSize: 13)),
-                          subtitle: Text(
-                              '${e.category} · ${e.confidence}% confidence',
-                              style: GoogleFonts.poppins(
-                                  fontSize: 11, color: AppTheme.textMedium)),
-                          trailing: Text('₹${e.amount.toStringAsFixed(0)}',
-                              style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.w700,
-                                  color: AppTheme.errorRed)),
-                          onTap: () {
-                            Navigator.pop(ctx);
-                            _showReviewDialog(e);
-                          },
-                        )),
-                  ]),
-                ),
-              ]),
-            ),
-          ),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFFFBEB),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.4)),
-        ),
-        child: Row(children: [
-          const Icon(Icons.warning_amber_rounded,
-              color: Color(0xFFF59E0B), size: 20),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              '${_pendingReview.length} transaction${_pendingReview.length > 1 ? 's' : ''} need your review',
-              style: GoogleFonts.poppins(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF92400E)),
-            ),
-          ),
-          Text('Review →',
-              style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: const Color(0xFFF59E0B),
-                  fontWeight: FontWeight.w600)),
-        ]),
-      ),
-    );
-  }
 
   // ── Monthly spending summary ───────────────────────────────────────────────────
   Widget _buildMonthlyCard() {
@@ -830,12 +625,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                   ? Colors.white.withValues(alpha: 0.05)
                   : Colors.black.withValues(alpha: 0.05)),
           boxShadow: [
-<<<<<<< HEAD:lib/screens/dashboard_screen.dart
-            BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8)
-=======
             BoxShadow(
                 color: shadowCol, blurRadius: 20, offset: const Offset(0, 6))
->>>>>>> 6752cd844703b38679140fb7b3ac365ea543d677:my-first-project-main/lib/screens/dashboard_screen.dart
           ]),
       child: Column(children: [
         Icon(Icons.sms_outlined, size: 44, color: AppTheme.textLight),
@@ -857,16 +648,10 @@ class _DashboardScreenState extends State<DashboardScreen>
               style: GoogleFonts.poppins(
                   fontSize: 13, fontWeight: FontWeight.w500)),
           style: OutlinedButton.styleFrom(
-<<<<<<< HEAD:lib/screens/dashboard_screen.dart
-            foregroundColor: AppTheme.primaryBlue,
-            side: BorderSide(color: AppTheme.primaryBlue),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-=======
             foregroundColor: AppTheme.skyBlueDark,
             side: BorderSide(color: AppTheme.skyBlueDark),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
->>>>>>> 6752cd844703b38679140fb7b3ac365ea543d677:my-first-project-main/lib/screens/dashboard_screen.dart
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           ),
         ),

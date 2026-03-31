@@ -21,14 +21,14 @@ final List<CategoryModel> defaultCategories = [
   // Expenses
   const CategoryModel(
     id: 'food',
-    name: 'Food & Dining',
+    name: 'Food',
     icon: Icons.restaurant,
     color: Color(0xFFFF6B6B),
     type: 'expense',
   ),
   const CategoryModel(
-    id: 'transport',
-    name: 'Transport',
+    id: 'travel',
+    name: 'Travel',
     icon: Icons.directions_bus,
     color: Color(0xFF4ECDC4),
     type: 'expense',
@@ -38,6 +38,13 @@ final List<CategoryModel> defaultCategories = [
     name: 'Shopping',
     icon: Icons.shopping_bag,
     color: Color(0xFFFFD93D),
+    type: 'expense',
+  ),
+  const CategoryModel(
+    id: 'bills',
+    name: 'Bills',
+    icon: Icons.receipt_long,
+    color: Color(0xFF0EA5E9),
     type: 'expense',
   ),
   const CategoryModel(
@@ -55,33 +62,17 @@ final List<CategoryModel> defaultCategories = [
     type: 'expense',
   ),
   const CategoryModel(
+    id: 'health',
+    name: 'Health',
+    icon: Icons.local_hospital,
+    color: Color(0xFFEC4899),
+    type: 'expense',
+  ),
+  const CategoryModel(
     id: 'others',
     name: 'Others',
     icon: Icons.more_horiz,
     color: Color(0xFFB2BEC3),
     type: 'expense',
-  ),
-  
-  // Income
-  const CategoryModel(
-    id: 'allowance',
-    name: 'Allowance',
-    icon: Icons.account_balance_wallet,
-    color: Color(0xFF00B894),
-    type: 'income',
-  ),
-  const CategoryModel(
-    id: 'part_time',
-    name: 'Part-time Job',
-    icon: Icons.work,
-    color: Color(0xFF00CEC9),
-    type: 'income',
-  ),
-  const CategoryModel(
-    id: 'gift',
-    name: 'Gift',
-    icon: Icons.card_giftcard,
-    color: Color(0xFFFD79A8),
-    type: 'income',
   ),
 ];

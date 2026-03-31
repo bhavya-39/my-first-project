@@ -5,6 +5,7 @@ import 'dashboard_screen.dart';
 import 'reports_screen.dart';
 import 'profile_screen.dart';
 import 'add_expense_screen.dart';
+import 'goals_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -20,7 +21,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     DashboardScreen(),
     ReportsScreen(),
     SizedBox(), // Placeholder for Add button
-    SizedBox(), // Placeholder for Wallet/Transactions
+    GoalsScreen(),
     ProfileScreen(),
   ];
 
@@ -52,8 +53,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 context,
                 MaterialPageRoute(builder: (_) => const AddExpenseScreen()),
               );
-            } else if (index == 3) {
-              // Placeholder for Wallet
             } else {
               setState(() => _currentIndex = index);
             }
@@ -85,9 +84,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               ),
               label: '',
             ),
-            const BottomNavigationBarItem(
-                icon: Icon(Icons.account_balance_wallet_rounded),
-                label: 'Wallet'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.flag_rounded), label: 'Goals'),
             const BottomNavigationBarItem(
                 icon: Icon(Icons.person_rounded), label: 'Profile'),
           ],

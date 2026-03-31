@@ -9,7 +9,6 @@ class Expense {
   final DateTime date;
   final String? note;
   final String paymentMethod; // 'UPI' or 'Cash'
-  final bool needsReview;
   final int confidence; // 0–100
   final bool synced;
 
@@ -23,7 +22,6 @@ class Expense {
     required this.date,
     this.note,
     this.paymentMethod = 'UPI',
-    this.needsReview = false,
     this.confidence = 100,
     this.synced = false,
   });
@@ -37,7 +35,7 @@ class Expense {
         'payment_method': paymentMethod,
         'date': date.millisecondsSinceEpoch,
         'note': note,
-        'needs_review': needsReview ? 1 : 0,
+        'needs_review': 0, // Legacy support, always 0
         'confidence': confidence,
         'synced': synced ? 1 : 0,
       };
@@ -52,12 +50,11 @@ class Expense {
         paymentMethod: (m['payment_method'] as String?) ?? 'UPI',
         date: DateTime.fromMillisecondsSinceEpoch(m['date'] as int),
         note: m['note'] as String?,
-        needsReview: (m['needs_review'] as int) == 1,
         confidence: m['confidence'] as int,
         synced: (m['synced'] as int) == 1,
       );
 
-  Expense copyWith({bool? needsReview, bool? synced, String? paymentMethod}) =>
+  Expense copyWith({bool? synced, String? paymentMethod}) =>
       Expense(
         id: id,
         hash: hash,
@@ -68,7 +65,6 @@ class Expense {
         date: date,
         note: note,
         paymentMethod: paymentMethod ?? this.paymentMethod,
-        needsReview: needsReview ?? this.needsReview,
         confidence: confidence,
         synced: synced ?? this.synced,
       );

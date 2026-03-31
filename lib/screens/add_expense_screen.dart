@@ -41,7 +41,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
     _CategoryItem('Travel', Icons.directions_bus_rounded, Color(0xFF4ECDC4)),
     _CategoryItem('Shopping', Icons.shopping_bag_rounded, Color(0xFFFFD93D)),
     _CategoryItem('Bills', Icons.receipt_long_rounded, Color(0xFF0EA5E9)),
-    _CategoryItem('Other', Icons.more_horiz_rounded, Color(0xFFB2BEC3)),
+    _CategoryItem('Entertainment', Icons.movie_rounded, Color(0xFF6C5CE7)),
+    _CategoryItem('Education', Icons.school_rounded, Color(0xFF0984E3)),
+    _CategoryItem('Health', Icons.local_hospital_rounded, Color(0xFFEC4899)),
+    _CategoryItem('Others', Icons.more_horiz_rounded, Color(0xFFB2BEC3)),
   ];
 
   // ── Animation ─────────────────────────────────────────────────────────────
@@ -119,7 +122,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen>
         note: note.isEmpty ? null : note,
         paymentMethod: _paymentMethod,
         confidence: 100,
-        needsReview: false,
       );
 
       // ── 1. Save to local SQLite ────────────────────────────────────────

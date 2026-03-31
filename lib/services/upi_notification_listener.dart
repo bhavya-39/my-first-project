@@ -136,9 +136,12 @@ class UpiNotificationListener {
       final rawHash = '${parsed.merchant}|${parsed.amount.toStringAsFixed(2)}|$minuteKey';
       final hash = md5.convert(utf8.encode(rawHash)).toString();
 
-      // 5. Deduplicate
+      // 5. Deduplicate (exact hash AND fuzzy duplicates)
       final db = LocalDatabase.instance;
-      if (await db.hashExists(hash)) return;
+      if (await db.hashExists(hash) ||
+          await db.isDuplicateExpense(amount: parsed.amount, date: parsed.timestamp)) {
+        return;
+      }
 
       // 6. Determine bank from package name if parser didn't find one
       final bank = parsed.bank ?? _bankFromPackage(pkg);
@@ -152,7 +155,6 @@ class UpiNotificationListener {
         bank: bank,
         date: parsed.timestamp,
         note: 'Auto-imported from UPI notification',
-        needsReview: parsed.needsReview,
         confidence: parsed.confidence,
       );
 

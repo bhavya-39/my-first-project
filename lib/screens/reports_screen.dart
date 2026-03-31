@@ -45,23 +45,32 @@ class _ReportsScreenState extends State<ReportsScreen>
     'Food',
     'Travel',
     'Shopping',
+    'Bills',
     'Education',
+    'Entertainment',
+    'Health',
     'Others',
   ];
 
   static const _categoryColors = <String, Color>{
     'Food': Color(0xFFFF6B6B),
-    'Travel': Color(0xFF0EA5E9),
-    'Shopping': Color(0xFF0EA5E9),
-    'Education': Color(0xFF6366F1),
+    'Travel': Color(0xFF4ECDC4),
+    'Shopping': Color(0xFFFFD93D),
+    'Bills': Color(0xFF0EA5E9),
+    'Education': Color(0xFF0984E3),
+    'Entertainment': Color(0xFF6C5CE7),
+    'Health': Color(0xFFEC4899),
     'Others': Color(0xFF94A3B8),
   };
 
   static const _categoryIcons = <String, IconData>{
     'Food': Icons.restaurant_rounded,
-    'Travel': Icons.directions_car_rounded,
+    'Travel': Icons.flight_rounded,
     'Shopping': Icons.shopping_bag_rounded,
+    'Bills': Icons.receipt_long_rounded,
     'Education': Icons.school_rounded,
+    'Entertainment': Icons.movie_rounded,
+    'Health': Icons.local_hospital_rounded,
     'Others': Icons.category_rounded,
   };
 
@@ -73,10 +82,7 @@ class _ReportsScreenState extends State<ReportsScreen>
       'food': 'Food',
       'shopping': 'Shopping',
       'education': 'Education',
-      'Entertainment': 'Others',
-      'Utilities': 'Others',
-      'Health': 'Others',
-      'Transfers': 'Others',
+      'Utilities': 'Bills',
       'Other': 'Others',
     };
     return map[raw] ?? (_knownCategories.contains(raw) ? raw : 'Others');
@@ -576,16 +582,20 @@ class _ReportsScreenState extends State<ReportsScreen>
                               if (idx < 0 || idx >= _knownCategories.length) {
                                 return const SizedBox.shrink();
                               }
-                              final abbrevs = [
-                                'Food',
-                                'Travel',
-                                'Shop',
-                                'Edu',
-                                'Other'
-                              ];
+                              final cat = _knownCategories[idx];
+                              final abbrevs = {
+                                'Food': 'Food',
+                                'Travel': 'Trav',
+                                'Shopping': 'Shop',
+                                'Bills': 'Bill',
+                                'Education': 'Edu',
+                                'Entertainment': 'Ent',
+                                'Health': 'Med',
+                                'Others': 'Othr',
+                              };
                               return Padding(
                                 padding: const EdgeInsets.only(top: 4),
-                                child: Text(abbrevs[idx],
+                                child: Text(abbrevs[cat] ?? cat.substring(0, 3),
                                     style: GoogleFonts.poppins(
                                         fontSize: 9,
                                         color: AppTheme.textMedium,
@@ -713,18 +723,20 @@ class _ReportsScreenState extends State<ReportsScreen>
                         color:
                             isMore ? AppTheme.errorRed : AppTheme.successGreen),
                     const SizedBox(width: 6),
-                    Text(
-                      diff == 0
-                          ? 'Same as last month'
-                          : isMore
-                              ? 'Your spending increased by ₹${diff.abs().toStringAsFixed(0)} compared to last month.'
-                              : 'Your spending decreased by ₹${diff.abs().toStringAsFixed(0)} compared to last month.',
-                      style: GoogleFonts.poppins(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: isMore
-                              ? AppTheme.errorRed
-                              : AppTheme.successGreen),
+                    Expanded(
+                      child: Text(
+                        diff == 0
+                            ? 'Same as last month'
+                            : isMore
+                                ? 'Your spending increased by ₹${diff.abs().toStringAsFixed(0)} compared to last month.'
+                                : 'Your spending decreased by ₹${diff.abs().toStringAsFixed(0)} compared to last month.',
+                        style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: isMore
+                                ? AppTheme.errorRed
+                                : AppTheme.successGreen),
+                      ),
                     ),
                   ],
                 ),

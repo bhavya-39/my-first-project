@@ -17,29 +17,23 @@ class CategoryBreakdownCard extends StatelessWidget {
   static const _categoryIcons = <String, IconData>{
     'Food': Icons.restaurant_rounded,
     'Shopping': Icons.shopping_bag_rounded,
-    'Transport': Icons.directions_car_rounded,
-    'Entertainment': Icons.movie_rounded,
-    'Utilities': Icons.bolt_rounded,
-    'Health': Icons.local_hospital_rounded,
-    'Education': Icons.school_rounded,
-    'Transfers': Icons.swap_horiz_rounded,
     'Travel': Icons.flight_rounded,
     'Bills': Icons.receipt_long_rounded,
-    'Other': Icons.category_rounded,
+    'Entertainment': Icons.movie_rounded,
+    'Education': Icons.school_rounded,
+    'Health': Icons.local_hospital_rounded,
+    'Others': Icons.category_rounded,
   };
 
   static const _categoryColors = <String, Color>{
     'Food': Color(0xFFFF6B6B),
-    'Shopping': Color(0xFF0EA5E9),
-    'Transport': Color(0xFF0EA5E9),
-    'Entertainment': Color(0xFFF59E0B),
-    'Utilities': Color(0xFF10B981),
-    'Health': Color(0xFFEC4899),
-    'Education': Color(0xFF6366F1),
-    'Transfers': Color(0xFF14B8A6),
+    'Shopping': Color(0xFFFFD93D),
     'Travel': Color(0xFF4ECDC4),
     'Bills': Color(0xFF0EA5E9),
-    'Other': Color(0xFF94A3B8),
+    'Entertainment': Color(0xFF6C5CE7),
+    'Education': Color(0xFF0984E3),
+    'Health': Color(0xFFEC4899),
+    'Others': Color(0xFF94A3B8),
   };
 
   @override
